@@ -13,7 +13,7 @@ pipeline {
         GITHUB_REPO = 'https://github.com/kyusooK/12stmall-demo'
         GITHUB_BRANCH = 'main'
     }
- 
+  
     stage('Parallel Build and Test') {
         steps {
             script {
