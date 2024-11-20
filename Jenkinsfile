@@ -1,6 +1,6 @@
 pipeline {
     agent any
-   
+
     environment {
         REGISTRY = 'user19.azurecr.io'
         SERVICES = ['order', 'delivery', 'product']
@@ -9,49 +9,63 @@ pipeline {
         AKS_NAMESPACE = 'default'
         AZURE_CREDENTIALS_ID = 'Azure-Cred'
         TENANT_ID = '29d166ad-94ec-45cb-9f65-561c038e1c7a'
+        GITHUB_CREDENTIALS_ID = 'Github-Cred'
+        GITHUB_REPO = 'https://github.com/kyusooK/12stmall-demo'
+        GITHUB_BRANCH = 'main'
     }
 
-    stages {
-        stage('Clone Repository') {
-            steps {
-                checkout scm
-        }
-    }
-
-    stage('Maven Build') {
+    stage('Parallel Build and Test') {
         steps {
             script {
-                SERVICES.each { service ->
-                    dir(service) {
-                        withMaven(maven: 'Maven') {
-                            sh 'mvn package -DskipTests'
+                parallel SERVICES.collectEntries { service ->
+                    ["${service}" : {
+                        stage("Build ${service}") {
+                            dir(service) {
+                                withMaven(maven: 'Maven') {
+                                    sh 'mvn clean package -DskipTests'
+                                }
+                            }
                         }
-                    }
+                    }]
                 }
             }
         }
     }
-
-    stage('Docker Build & Push') {
+    stage('Parallel Docker Build & Push') {
         steps {
             script {
-                SERVICES.each { service ->
-                    dir(service) {
-                        def image = docker.build("${REGISTRY}/${service}:v${env.BUILD_NUMBER}")
-                        sh "az acr login --name ${REGISTRY.split('\\.')[0]}"
-                        image.push()
-                        sh "docker rmi ${REGISTRY}/${service}:v${env.BUILD_NUMBER}"
-                    }
+                sh "az acr login --name ${REGISTRY.split('\\.')[0]}"
+                parallel SERVICES.collectEntries { service ->
+                    ["${service}" : {
+                        dir(service) {
+                            def image = docker.build("${REGISTRY}/${service}:v${env.BUILD_NUMBER}")
+                            image.push()
+                            sh "docker rmi ${REGISTRY}/${service}:v${env.BUILD_NUMBER}"
+                        }
+                    }]
                 }
             }
         }
     }
-
     stage('Azure Login') {
         steps {
             script {
                 withCredentials([usernamePassword(credentialsId: env.AZURE_CREDENTIALS_ID, usernameVariable: 'AZURE_CLIENT_ID', passwordVariable: 'AZURE_CLIENT_SECRET')]) {
                     sh 'az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant ${TENANT_ID}'
+                }
+            }
+        }
+    }
+
+    stage('Update Kubernetes Manifests') {
+        steps {
+            script {
+                SERVICES.each { service ->
+                    dir(service) {
+                        sh """
+                            sed -i 's|image: ${REGISTRY}/${service}:.*|image: ${REGISTRY}/${service}:v${env.BUILD_NUMBER}|' kubernetes/deployment.yaml
+                        """
+                    }
                 }
             }
         }
@@ -93,5 +107,4 @@ pipeline {
             }
         }
     }
-}
 }
