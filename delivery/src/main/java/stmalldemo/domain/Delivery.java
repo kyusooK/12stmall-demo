@@ -25,20 +25,22 @@ public class Delivery {
 
     private String productId;
 
+    private Integer qty;
+
     private String productName;
 
     private String address;
 
     private String status;
 
-    @PostPersist
-    public void onPostPersist() {
-        DeliveryStarted deliveryStarted = new DeliveryStarted(this);
-        deliveryStarted.publishAfterCommit();
+    // @PostPersist
+    // public void onPostPersist() {
+    //     DeliveryStarted deliveryStarted = new DeliveryStarted(this);
+    //     deliveryStarted.publishAfterCommit();
 
-        DeliveryCanceled deliveryCanceled = new DeliveryCanceled(this);
-        deliveryCanceled.publishAfterCommit();
-    }
+    //     DeliveryCanceled deliveryCanceled = new DeliveryCanceled(this);
+    //     deliveryCanceled.publishAfterCommit();
+    // }
 
     public static DeliveryRepository repository() {
         DeliveryRepository deliveryRepository = DeliveryApplication.applicationContext.getBean(
@@ -47,35 +49,24 @@ public class Delivery {
         return deliveryRepository;
     }
 
-    //<<< Clean Arch / Port Method
     public static void startDelivery(OrderPlaced orderPlaced) {
-        //implement business logic here:
 
-        /** Example 1:  new item 
+        // 주문이 발생함에 따라 등록한 주문정보와 매칭되는 정보를 배송정보에 등록
         Delivery delivery = new Delivery();
+        delivery.setOrderId(orderPlaced.getId());
+        delivery.setUserId(orderPlaced.getUserId());
+        delivery.setProductName(orderPlaced.getProductName());
+        delivery.setProductId(orderPlaced.getProductId());
+        delivery.setAddress(orderPlaced.getAddress());
+        delivery.setQty(orderPlaced.getQty());
+        delivery.setStatus("배송시작됨");
         repository().save(delivery);
-
+        
         DeliveryStarted deliveryStarted = new DeliveryStarted(delivery);
         deliveryStarted.publishAfterCommit();
-        */
-
-        /** Example 2:  finding and process
-        
-        repository().findById(orderPlaced.get???()).ifPresent(delivery->{
-            
-            delivery // do something
-            repository().save(delivery);
-
-            DeliveryStarted deliveryStarted = new DeliveryStarted(delivery);
-            deliveryStarted.publishAfterCommit();
-
-         });
-        */
 
     }
 
-    //>>> Clean Arch / Port Method
-    //<<< Clean Arch / Port Method
     public static void cancelDelivery(OrderCanceled orderCanceled) {
         //implement business logic here:
 
