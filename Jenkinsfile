@@ -48,8 +48,13 @@ pipeline {
 
                             stage("Deploy to AKS - ${service}") {
 
-                               dir(service) { 
+                               dir(service) { // Ensure we are in the correct service directory
                                     sh "az aks get-credentials --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER}"
+                                    
+                                    // Debugging: Print the current directory and list files
+                                    sh 'pwd'
+                                    sh 'ls -R'
+                                    
                                     sh """
                                     sed 's/latest/v${env.BUILD_ID}/g' kubernetes/deployment.yaml > output.yaml
                                     cat output.yaml
