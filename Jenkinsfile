@@ -51,10 +51,9 @@ pipeline {
                                 sh "az aks get-credentials --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER}"
 
                                 sh 'pwd'
-                                sh 'ls -R'
                                 
                                 sh """
-                                sed 's/latest/v${env.BUILD_ID}/g' ${service}/kubernetes/deployment.yaml > output.yaml
+                                sed 's/latest/v${env.BUILD_ID}/g' /kubernetes/deployment.yaml > output.yaml
                                 cat output.yaml
                                 kubectl apply -f output.yaml
                                 kubectl apply -f ${service}/kubernetes/service.yaml
