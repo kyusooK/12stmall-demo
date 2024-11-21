@@ -117,6 +117,11 @@ pipeline {
         }
 
         stage('CleanUp Images') {
+            when {
+                expression {
+                    currentBuild.result != 'NOT_BUILT'
+                }
+            }
             steps {
                 script {
                     def services = SERVICES.tokenize(',') // Use tokenize to split the string into a list
