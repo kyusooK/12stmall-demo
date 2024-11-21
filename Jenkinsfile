@@ -17,7 +17,7 @@ pipeline {
                 checkout scm
             }
         }
-        
+         
         stage('Maven Build') {
             steps {
                 dir("${SERVICES}") { // Change directory to SERVICES
