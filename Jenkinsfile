@@ -21,7 +21,7 @@ pipeline {
                 changeset "delivery/src/**, order/src/**, product/src/**"
             }
         }
-        
+         
         stage('Clone Repository') {
             steps {
                 checkout scm
