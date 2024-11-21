@@ -19,7 +19,13 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                checkout scm
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "*/${GITHUB_BRANCH}"]],
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [[$class: 'PathRestriction', includedRegions: 'order/src/.*|delivery/src/.*|product/src/.*']],
+                    userRemoteConfigs: [[url: "https://${GITHUB_REPO}"]]
+                ])
             }
         }
 
@@ -65,13 +71,12 @@ pipeline {
                             stage('Commit and Push to GitHub') {
                                 withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                                     sh """
-                                        rm -rf repo
                                         git config --global user.email "your-email@example.com"
                                         git config --global user.name "Jenkins CI"
                                         git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@${GITHUB_REPO} repo
                                         cp kubernetes/deployment.yaml repo/${service}/kubernetes/deployment.yaml
                                         cd repo
-                                        git add ${service}/kubernetes/deployment.yaml
+                                        git add ${service}kubernetes/deployment.yaml
                                         git commit -m "Update deployment.yaml with build ${env.BUILD_NUMBER}"
                                         git push origin ${GITHUB_BRANCH}
                                         cd ..
