@@ -20,9 +20,10 @@ pipeline {
         
         stage('Maven Build') {
             steps {
-                withMaven(maven: 'Maven') {
-                    sh 'cd order'
-                    sh 'mvn package -DskipTests'
+                dir("${SERVICES}") { // Change directory to SERVICES
+                    withMaven(maven: 'Maven') {
+                        sh 'mvn package -DskipTests'
+                    }
                 }
             }
         }
@@ -66,13 +67,15 @@ pipeline {
             steps {
                 script {
                     sh "az aks get-credentials --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER}"
-                    sh """
-                    sed 's/latest/v${env.BUILD_ID}/g' kubernetes/deploy.yaml > output.yaml
-                    cat output.yaml
-                    kubectl apply -f output.yaml
-                    kubectl apply -f kubernetes/service.yaml
-                    rm output.yaml
-                    """
+                    dir("${SERVICES}") { // Change directory to SERVICES
+                        sh """
+                        sed 's/latest/v${env.BUILD_ID}/g' kubernetes/deploy.yaml > output.yaml
+                        cat output.yaml
+                        kubectl apply -f output.yaml
+                        kubectl apply -f kubernetes/service.yaml
+                        rm output.yaml
+                        """
+                    }
                 }
             }
         }
