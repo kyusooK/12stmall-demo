@@ -8,7 +8,7 @@ import lombok.Data;
 import stmalldemo.OrderApplication;
 import stmalldemo.domain.OrderCanceled;
 import stmalldemo.domain.OrderPlaced;
- 
+  
 @Entity
 @Table(name = "Order_table")
 @Data
