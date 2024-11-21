@@ -1,6 +1,6 @@
 pipeline {
     agent any
- 
+
     environment {
         REGISTRY = 'user19.azurecr.io'
         SERVICES = 'order,delivery,product' // fix your microservices
@@ -19,13 +19,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: "*/${GITHUB_BRANCH}"]],
-                    doGenerateSubmoduleConfigurations: false,
-                    extensions: [[$class: 'PathRestriction', includedRegions: 'order/src/.*|delivery/src/.*|product/src/.*']],
-                    userRemoteConfigs: [[url: "https://${GITHUB_REPO}"]]
-                ])
+                checkout scm
             }
         }
 
@@ -66,6 +60,8 @@ pipeline {
                                 sh """
                                 sed -i 's|image: \"${REGISTRY}/${service}:.*\"|image: \"${REGISTRY}/${service}:v${env.BUILD_ID}\"|' kubernetes/deployment.yaml
                                 cat kubernetes/deployment.yaml
+                                kubectl apply -f kubernetes/deployment.yaml
+                                kubectl apply -f kubernetes/service.yaml
                                 """
                             }
                             stage('Commit and Push to GitHub') {
