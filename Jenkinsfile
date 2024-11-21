@@ -1,6 +1,6 @@
 pipeline {
     agent any
-     
+        
     environment {
         REGISTRY = 'user19.azurecr.io'
         SERVICES = 'order'
