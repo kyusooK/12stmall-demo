@@ -17,6 +17,9 @@ pipeline {
     }
     stages {
         stage('Clone Repository') {
+            when {
+                changeset "delivery/src/**, order/src/**, product/src/**"
+            }
             steps {
                 checkout scm
             }
@@ -87,6 +90,9 @@ pipeline {
         }
 
         stage('CleanUp Images') {
+            when {
+                changeset "delivery/src/**, order/src/**, product/src/**"
+            }
             steps {
                 script {
                     def services = SERVICES.tokenize(',') // Use tokenize to split the string into a list
