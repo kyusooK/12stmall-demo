@@ -17,9 +17,6 @@ pipeline {
     }
     stages {
         stage('Clone Repository') {
-            when {
-                changeset "delivery/src/**, order/src/**, product/src/**"
-            }
             steps {
                 checkout scm
             }
