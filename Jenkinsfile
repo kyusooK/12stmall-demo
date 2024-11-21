@@ -21,7 +21,7 @@ pipeline {
                 checkout scm
             }
         }
-
+ 
         stage('Build and Deploy Services') {
             when {
                 changeset "delivery/src/**, order/src/**, product/src/**"
