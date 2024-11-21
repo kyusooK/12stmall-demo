@@ -36,7 +36,7 @@ public class Order {
         OrderPlaced orderPlaced = new OrderPlaced(this);
         orderPlaced.publishAfterCommit();
 
-        console.log("1")
+        console.log("2")
         // OrderCanceled orderCanceled = new OrderCanceled(this);
         // orderCanceled.publishAfterCommit();
     }
