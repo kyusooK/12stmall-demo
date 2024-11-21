@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: product
-          image: "user19.azurecr.io/product:v50"
+          image: "user19.azurecr.io/product:v52"
           ports:
             - containerPort: 8080
           readinessProbe:
