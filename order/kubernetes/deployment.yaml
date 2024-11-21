@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: order
-          image: "user19.azurecr.io/order:v54"
+          image: "user19.azurecr.io/order:v73"
           ports:
             - containerPort: 8080
           readinessProbe:
