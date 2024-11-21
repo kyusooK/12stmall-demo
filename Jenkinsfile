@@ -86,8 +86,6 @@ pipeline {
                                 sh """
                                 sed -i 's|image: \"${REGISTRY}/${service}:.*\"|image: \"${REGISTRY}/${service}:v${env.BUILD_ID}\"|' kubernetes/deployment.yaml
                                 cat kubernetes/deployment.yaml
-                                kubectl apply -f kubernetes/deployment.yaml
-                                kubectl apply -f kubernetes/service.yaml
                                 """
                             }
                             stage('Commit and Push to GitHub') {
