@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: delivery
-          image: "user19.azurecr.io/delivery:v50"
+          image: "user19.azurecr.io/delivery:v52"
           ports:
             - containerPort: 8080
           readinessProbe:
