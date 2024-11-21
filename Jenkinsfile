@@ -64,6 +64,7 @@ pipeline {
                             stage('Commit and Push to GitHub') {
                                 withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                                     sh """
+                                        rm -rf repo
                                         git config --global user.email "your-email@example.com"
                                         git config --global user.name "Jenkins CI"
                                         git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@${GITHUB_REPO} repo
