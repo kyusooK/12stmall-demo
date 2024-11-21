@@ -3,82 +3,65 @@ pipeline {
 
     environment {
         REGISTRY = 'user19.azurecr.io'
-        SERVICES = 'order'
+        SERVICES = ['order', 'inventory', 'product'] // List of services
         AKS_CLUSTER = 'user19-aks'
         RESOURCE_GROUP = 'user19-rsrcgrp'
         AKS_NAMESPACE = 'default'
         AZURE_CREDENTIALS_ID = 'Azure-Cred'
         TENANT_ID = '29d166ad-94ec-45cb-9f65-561c038e1c7a'
     }
-       
+
     stages {
         stage('Clone Repository') {
             steps {
                 checkout scm
             }
         }
-         
-        stage('Maven Build') {
+
+        stage('Build and Deploy Services') {
             steps {
-                dir("${SERVICES}") { // Change directory to SERVICES
-                    withMaven(maven: 'Maven') {
-                        sh 'mvn package -DskipTests'
+                script {
+                    SERVICES.each { service ->
+                        dir(service) {
+                            stage("Maven Build - ${service}") {
+                                withMaven(maven: 'Maven') {
+                                    sh 'mvn package -DskipTests'
+                                }
+                            }
+
+                            stage("Docker Build - ${service}") {
+                                image = docker.build("${REGISTRY}/${service}:v${env.BUILD_NUMBER}")
+                            }
+
+                            stage("Push to ACR - ${service}") {
+                                sh "az acr login --name ${REGISTRY.split('\\.')[0]}"
+                                sh "docker push ${REGISTRY}/${service}:v${env.BUILD_NUMBER}"
+                            }
+
+                            stage("Deploy to AKS - ${service}") {
+                                sh "az aks get-credentials --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER}"
+                                sh """
+                                sed 's/latest/v${env.BUILD_ID}/g' kubernetes/deploy.yaml > output.yaml
+                                cat output.yaml
+                                kubectl apply -f output.yaml
+                                kubectl apply -f kubernetes/service.yaml
+                                rm output.yaml
+                                """
+                            }
+                        }
                     }
                 }
             }
         }
-        
-        stage('Docker Build') {
-            steps {
-                script {
-                    image = docker.build("${REGISTRY}/${IMAGE_NAME}:v${env.BUILD_NUMBER}")
-                }
-            }
-        }
-        
-        stage('Azure Login') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: env.AZURE_CREDENTIALS_ID, usernameVariable: 'AZURE_CLIENT_ID', passwordVariable: 'AZURE_CLIENT_SECRET')]) {
-                        sh 'az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant ${TENANT_ID}'
-                    }
-                }
-            }
-        }
-        
-        stage('Push to ACR') {
-            steps {
-                script {
-                    sh "az acr login --name ${REGISTRY.split('\\.')[0]}"
-                    sh "docker push ${REGISTRY}/${IMAGE_NAME}:v${env.BUILD_NUMBER}"
-                }
-            }
-        }
-        
+
         stage('CleanUp Images') {
             steps {
-                sh """
-                docker rmi ${REGISTRY}/${IMAGE_NAME}:v$BUILD_NUMBER
-                """
-            }
-        }
-        
-        stage('Deploy to AKS') {
-            steps {
                 script {
-                    sh "az aks get-credentials --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER}"
-                    dir("${SERVICES}") { // Change directory to SERVICES
-                        sh """
-                        sed 's/latest/v${env.BUILD_ID}/g' kubernetes/deploy.yaml > output.yaml
-                        cat output.yaml
-                        kubectl apply -f output.yaml
-                        kubectl apply -f kubernetes/service.yaml
-                        rm output.yaml
-                        """
+                    SERVICES.each { service ->
+                        sh "docker rmi ${REGISTRY}/${service}:v${env.BUILD_NUMBER}"
                     }
                 }
             }
         }
     }
 }
-
