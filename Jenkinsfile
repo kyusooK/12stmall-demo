@@ -70,7 +70,7 @@ pipeline {
                                         git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@${GITHUB_REPO} repo
                                         cp kubernetes/deployment.yaml repo/${service}/kubernetes/deployment.yaml
                                         cd repo
-                                        git add kubernetes/deployment.yaml
+                                        git add ${service}kubernetes/deployment.yaml
                                         git commit -m "Update deployment.yaml with build ${env.BUILD_NUMBER}"
                                         git push origin ${GITHUB_BRANCH}
                                         cd ..
