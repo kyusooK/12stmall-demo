@@ -10,7 +10,7 @@ pipeline {
         AZURE_CREDENTIALS_ID = 'Azure-Cred'
         TENANT_ID = '29d166ad-94ec-45cb-9f65-561c038e1c7a'
     }
-      
+       
     stages {
         stage('Clone Repository') {
             steps {
