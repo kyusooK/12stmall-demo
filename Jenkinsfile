@@ -47,14 +47,17 @@ pipeline {
                             }
 
                             stage("Deploy to AKS - ${service}") {
-                                sh "az aks get-credentials --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER}"
-                                sh """
-                                sed 's/latest/v${env.BUILD_ID}/g' ${service}/kubernetes/deployment.yaml > output.yaml
-                                cat output.yaml
-                                kubectl apply -f output.yaml
-                                kubectl apply -f ${service}/kubernetes/service.yaml
-                                rm output.yaml
-                                """
+
+                               dir(service) { 
+                                    sh "az aks get-credentials --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER}"
+                                    sh """
+                                    sed 's/latest/v${env.BUILD_ID}/g' kubernetes/deployment.yaml > output.yaml
+                                    cat output.yaml
+                                    kubectl apply -f output.yaml
+                                    kubectl apply -f kubernetes/service.yaml
+                                    rm output.yaml
+                                    """
+                                }
                             }
                         }
                     }
