@@ -56,8 +56,10 @@ pipeline {
                                 sh 'pwd'
                                 
                                 sh """
-                                sed 's/latest/v${env.BUILD_ID}/g' kubernetes/deployment.yaml
+                                sed -i 's|image: \"${REGISTRY}/${service}:.*\"|image: \"${REGISTRY}/${service}:v${env.BUILD_ID}\"|' kubernetes/deploy.yaml
                                 cat kubernetes/deploy.yaml
+                                kubectl apply -f kubernetes/deploy.yaml
+                                kubectl apply -f kubernetes/service.yaml
                                 """
                             }
                         }
