@@ -14,7 +14,7 @@ import stmalldemo.domain.OrderPlaced;
 @Data
 //<<< DDD / Aggregate Root
 public class Order {
-
+ 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
