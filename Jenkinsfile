@@ -24,9 +24,7 @@ pipeline {
                 // 빌드 스텝
             }
         }
-    }
-    
-    stages {
+        
         stage('Clone Repository') {
             steps {
                 checkout scm
