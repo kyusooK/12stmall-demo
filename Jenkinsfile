@@ -21,6 +21,7 @@ pipeline {
         stage('Maven Build') {
             steps {
                 withMaven(maven: 'Maven') {
+                    sh cd order
                     sh 'mvn package -DskipTests'
                 }
             }
