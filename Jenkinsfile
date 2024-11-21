@@ -21,7 +21,7 @@ pipeline {
                 checkout scm
             }
         }
-  
+   
         stage('Build and Deploy Services') {
             steps {
                 script {
