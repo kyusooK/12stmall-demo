@@ -15,7 +15,7 @@ pipeline {
         GITHUB_REPO = 'github.com/${GIT_USER_NAME}/12stmall-demo.git'
         GITHUB_BRANCH = 'main' // 업로드할 브랜치
     }
-
+ 
     stages {
         stage('Clone Repository') {
             steps {
