@@ -1,6 +1,6 @@
 pipeline {
     agent any
-     
+
     environment {
         REGISTRY = 'user19.azurecr.io'
         SERVICES = 'order,delivery,product' // fix your microservices
@@ -15,13 +15,40 @@ pipeline {
         GITHUB_REPO = 'github.com/${GIT_USER_NAME}/12stmall-demo.git'
         GITHUB_BRANCH = 'main' // 업로드할 브랜치
     }
+
     stages {
+        stage('Check Modified Files') {
+            steps {
+                script {
+                    // Git 변경된 파일 목록 가져오기
+                    def changedFiles = sh(returnStdout: true, script: 'git diff --name-only HEAD~1 HEAD').trim().split('\n')
+
+                    // 'src/' 폴더 변경 여부 확인
+                    def targetFolder = 'src/'
+                    def isModified = changedFiles.any { it.startsWith(targetFolder) }
+
+                    if (isModified) {
+                        echo "Changes detected in ${targetFolder}. Proceeding with the pipeline."
+                    } else {
+                        echo "No changes in ${targetFolder}. Stopping pipeline execution."
+                        currentBuild.result = 'NOT_BUILT'
+                        return
+                    }
+                }
+            }
+        }
+
         stage('Clone Repository') {
+            when {
+                expression {
+                    currentBuild.result != 'NOT_BUILT'
+                }
+            }
             steps {
                 checkout scm
             }
         }
-     
+
         stage('Build and Deploy Services') {
             steps {
                 script {
@@ -59,18 +86,19 @@ pipeline {
                                 sh """
                                 sed -i 's|image: \"${REGISTRY}/${service}:.*\"|image: \"${REGISTRY}/${service}:v${env.BUILD_ID}\"|' kubernetes/deployment.yaml
                                 cat kubernetes/deployment.yaml
+                                kubectl apply -f kubernetes/deployment.yaml
+                                kubectl apply -f kubernetes/service.yaml
                                 """
                             }
                             stage('Commit and Push to GitHub') {
                                 withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                                     sh """
-                                        rm -rf repo
                                         git config --global user.email "your-email@example.com"
                                         git config --global user.name "Jenkins CI"
                                         git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@${GITHUB_REPO} repo
                                         cp kubernetes/deployment.yaml repo/${service}/kubernetes/deployment.yaml
                                         cd repo
-                                        git add ${service}/kubernetes/deployment.yaml
+                                        git add ${service}kubernetes/deployment.yaml
                                         git commit -m "Update deployment.yaml with build ${env.BUILD_NUMBER}"
                                         git push origin ${GITHUB_BRANCH}
                                         cd ..
