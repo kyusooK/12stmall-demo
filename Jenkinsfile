@@ -21,6 +21,7 @@ pipeline {
         stage('Build and Deploy Services') {
             steps {
                 script {
+                    def services = SERVICES.split(',')
                     SERVICES.each { service ->
                         dir(service) {
                             stage("Maven Build - ${service}") {
@@ -57,6 +58,7 @@ pipeline {
         stage('CleanUp Images') {
             steps {
                 script {
+                    def services = SERVICES.split(',')
                     SERVICES.each { service ->
                         sh "docker rmi ${REGISTRY}/${service}:v${env.BUILD_NUMBER}"
                     }
