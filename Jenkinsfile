@@ -16,12 +16,6 @@ pipeline {
         GITHUB_BRANCH = 'main' // 업로드할 브랜치
     }
     stages {
-        stage('Build') {
-            when {
-                changeset "delivery/src/**, order/src/**, product/src/**"
-            }
-        }
-         
         stage('Clone Repository') {
             steps {
                 checkout scm
