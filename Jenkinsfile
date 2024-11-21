@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         REGISTRY = 'user19.azurecr.io'
-        SERVICES = 'order,inventory,product' // List of services as a comma-separated string
+        SERVICES = 'order,delivery,product' // List of services as a comma-separated string
         AKS_CLUSTER = 'user19-aks'
         RESOURCE_GROUP = 'user19-rsrcgrp'
         AKS_NAMESPACE = 'default'
