@@ -5,7 +5,7 @@ import java.util.*;
 import lombok.*;
 import stmalldemo.domain.*;
 import stmalldemo.infra.AbstractEvent;
-
+ 
 //<<< DDD / Domain Event
 @Data
 @ToString
