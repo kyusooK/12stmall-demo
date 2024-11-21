@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         REGISTRY = 'user19.azurecr.io'
-        SERVICES = 'order,delivery,product' // fix your microservices
+        SERVICES = 'order' // fix your microservices
         AKS_CLUSTER = 'user19-aks'
         RESOURCE_GROUP = 'user19-rsrcgrp'
         AKS_NAMESPACE = 'default'
@@ -27,7 +27,7 @@ pipeline {
                         def changedFiles = sh(returnStdout: true, script: 'git diff --name-only HEAD~1 HEAD').trim().split('\n')
     
                     // 'src/' 폴더 변경 여부 확인
-                        def targetFolder = '${service}/src/'
+                        def targetFolder = 'order/src/'
                         def isModified = changedFiles.any { it.startsWith(targetFolder) }
         
                         if (isModified) {
