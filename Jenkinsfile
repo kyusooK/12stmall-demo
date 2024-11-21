@@ -23,6 +23,9 @@ pipeline {
         }
 
         stage('Build and Deploy Services') {
+            when {
+                changeset "delivery/src/**, order/src/**, product/src/**"
+            }
             steps {
                 script {
                     def services = SERVICES.tokenize(',') // Use tokenize to split the string into a list
