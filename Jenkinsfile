@@ -9,10 +9,10 @@ pipeline {
         AKS_NAMESPACE = 'default'
         AZURE_CREDENTIALS_ID = 'Azure-Cred'
         TENANT_ID = '29d166ad-94ec-45cb-9f65-561c038e1c7a'
-        GIT_USER_NAME = '{Your-GitHub-Name}'
+        GIT_USER_NAME = 'kyusooK'
         GIT_USER_EMAIL = '{Your-GitHub-Email}'
         GITHUB_CREDENTIALS_ID = 'Github-Cred'
-        GITHUB_REPO = 'github.com/{Your-GitHub-Name}/12stmall-demo.git'
+        GITHUB_REPO = 'github.com/${GIT_USER_NAME}/12stmall-demo.git'
         GITHUB_BRANCH = 'main' // 업로드할 브랜치
     }
 
