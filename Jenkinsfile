@@ -62,32 +62,27 @@ pipeline {
                                 cat kubernetes/deployment.yaml
                                 """
                             }
+                            stage('Commit and Push to GitHub') {
+                                withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                                    sh """
+                                        git config --global user.email "your-email@example.com"
+                                        git config --global user.name "Jenkins CI"
+                                        git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@${GITHUB_REPO} repo
+                                        cp kubernetes/deployment.yaml repo/${service}/kubernetes/deployment.yaml
+                                        cd repo
+                                        git add kubernetes/deployment.yaml
+                                        git commit -m "Update deployment.yaml with build ${env.BUILD_NUMBER}"
+                                        git push origin ${GITHUB_BRANCH}
+                                        cd ..
+                                        rm -rf repo
+                                    """
+                                }
+                            }
                         }
                     }
                 }
             }
         }
-
-        stage('Commit and Push to GitHub') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: GITHUB_CREDENTIALS_ID, usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                        sh """
-                            git config --global user.email "your-email@example.com"
-                            git config --global user.name "Jenkins CI"
-                            git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@${GITHUB_REPO} repo
-                            cp kubernetes/deployment.yaml repo/kubernetes/deployment.yaml
-                            cd repo
-                            git add kubernetes/deployment.yaml
-                            git commit -m "Update deployment.yaml with build ${env.BUILD_NUMBER}"
-                            git push origin ${GITHUB_BRANCH}
-                            cd ..
-                            rm -rf repo
-                        """
-                    }
-                }
-            }
-        } 
 
         stage('CleanUp Images') {
             steps {
