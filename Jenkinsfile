@@ -20,9 +20,6 @@ pipeline {
             when {
                 changeset "delivery/src/**, order/src/**, product/src/**"
             }
-            steps {
-                // 빌드 스텝
-            }
         }
         
         stage('Clone Repository') {
