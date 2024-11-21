@@ -35,6 +35,16 @@ pipeline {
                                 def image = docker.build("${REGISTRY}/${service}:v${env.BUILD_NUMBER}")
                             }
 
+                            stage('Azure Login') {
+                                steps {
+                                    script {
+                                        withCredentials([usernamePassword(credentialsId: env.AZURE_CREDENTIALS_ID, usernameVariable: 'AZURE_CLIENT_ID', passwordVariable: 'AZURE_CLIENT_SECRET')]) {
+                                            sh 'az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant ${TENANT_ID}'
+                                        }
+                                    }
+                                }
+                            }
+
                             stage("Push to ACR - ${service}") {
                                 sh "az acr login --name ${REGISTRY.split('\\.')[0]}"
                                 sh "docker push ${REGISTRY}/${service}:v${env.BUILD_NUMBER}"
